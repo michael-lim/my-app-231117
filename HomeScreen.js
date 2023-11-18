@@ -31,7 +31,7 @@ const HomeScreen = ({ navigation }) => {
       const today = new Date();
       // 어제 날짜 계산
       const yesterday = new Date(today);
-      yesterday.setDate(today.getDate() - 6);
+      yesterday.setDate(today.getDate() - 1);
 
       // const yesterdayDate = yesterday.toDateString();
 
@@ -40,7 +40,7 @@ const HomeScreen = ({ navigation }) => {
       const date = yesterday.getDate();
       const yesterdayDate = year + "-" + month + "-" + date;
 
-      await AsyncStorage.setItem(yesterdayDate, '10');
+      await AsyncStorage.setItem(yesterdayDate, '7');
     } catch (error) {
       console.error('Error saving data:', error);
     }
@@ -79,6 +79,14 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('Graph');
   };
 
+  const navigateToCalendar = () => {
+    navigation.navigate('Calendar');
+  };
+
+  const navigateToNoSmoking = () => {
+    navigation.navigate('NoSmoking');
+  };
+
   // const navigateToAbout = () => {
   //   navigation.navigate('About', { counter }); // 카운터 값을 About 화면으로 전달
   // };
@@ -91,6 +99,8 @@ const HomeScreen = ({ navigation }) => {
       <Button title="Settings로 이동" onPress={navigateToSettings} />
       <Button title="과거 날짜로 카운터 저장" onPress={saveCounterYesterday} />
       <Button title="그래프로 이동" onPress={navigateToGraph} />
+      <Button title="캘린더로 이동" onPress={navigateToCalendar} />
+      <Button title="금연페이지로 이동" onPress={navigateToNoSmoking} />
     </View>
   );
 };

@@ -7,6 +7,8 @@ import HomeScreen from './HomeScreen';
 import AboutScreen from './aboutscreen';
 import SettingsScreen from './SettingsScreen';
 import GraphScreen from './GraphScreen';
+import CalendarScreen from './CalendarScreen';
+import NoSmokingScreen from './NoSmokingScreen';
 
 const Stack = createStackNavigator();
 
@@ -19,6 +21,8 @@ const App = () => {
         <Stack.Screen name="About" component={AboutScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Graph" component={GraphScreen} />
+        <Stack.Screen name="Calendar" component={CalendarScreen} />
+        <Stack.Screen name="NoSmoking" component={NoSmokingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
