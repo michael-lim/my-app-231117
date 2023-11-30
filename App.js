@@ -15,13 +15,13 @@ const Tab = createBottomTabNavigator();
 
 function MyTabs() {
   return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Calendar" component={CalendarScreen} />
-      <Tab.Screen name="Graph" component={GraphScreen} />
-      <Tab.Screen name="NoSmoking" component={NoSmokingScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
-      <Tab.Screen name="About" component={AboutScreen} />
+    <Tab.Navigator style={styles.container}>
+      <Tab.Screen name="홈" component={HomeScreen} />
+      <Tab.Screen name="캘린더" component={CalendarScreen} />
+      <Tab.Screen name="통계" component={GraphScreen} />
+      <Tab.Screen name="금연" component={NoSmokingScreen} />
+      <Tab.Screen name="설정" component={SettingsScreen} />
+      <Tab.Screen name="임시" component={AboutScreen} />
     </Tab.Navigator>
   );
 }
@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    // fontSize: 50,
   },
 });
 
