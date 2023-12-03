@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { retrieveCount } from './HomeScreen';
 
 const AboutScreen = () => {
 
   // const { counter } = route.params; // Home 화면에서 전달된 카운터 값
   const [counterHistory, setCounterHistory] = useState([]);
-  const [counterToday, setCounterToday] = useState([]);
-  const [getOneItem, setGetOneItem] = useState([]);
+  // const [counterToday, setCounterToday] = useState([]);
+  // const [getOneItem, setGetOneItem] = useState([]);
+  const [showHistory, setShowHistory] = useState(false); // 추가된 부분
 
   ////////////날짜별 정렬을 위해
   const getAllKeysSortedByDate = async () => {
@@ -36,51 +38,58 @@ const AboutScreen = () => {
       //   const value = await AsyncStorage.getItem(key);
       //   return { key, value }; // 혹은 값을 다른 형태로 반환
       // }));
- //     return sortedData;
+      //     return sortedData;
 
       // const keys = await AsyncStorage.getAllKeys();
       // const history = await AsyncStorage.multiGet(keys);
       const history = await AsyncStorage.multiGet(sortedKeys);
       setCounterHistory(history);
+      // setShowHistory(history);
     } catch (error) {
       console.error('Error retrieving data:', error);
     }
   };
 
-  const fetchCounterToday = async () => {
-    try {
-      const todayKey = new Date().toDateString();
-      const todayValue = await AsyncStorage.getItem(todayKey);
-      setCounterToday(todayValue ? [[todayKey, todayValue]] : []);
-    } catch (error) {
-      console.error('Error retrieving data:', error);
-    }
-  };
+  // const fetchCounterToday = async () => {
+  //   try {
+  //     const todayKey = new Date().toDateString();
+  //     const todayValue = await AsyncStorage.getItem(todayKey);
+  //     setCounterToday(todayValue ? [[todayKey, todayValue]] : []);
+  //   } catch (error) {
+  //     console.error('Error retrieving data:', error);
+  //   }
+  // };
 
-  const fetchGetOneItem = async () => {
-    try {
-      const key = 'Thu Nov 16 2023';
-      const value = await AsyncStorage.getItem(key);
-      setGetOneItem(value ? [[key, value]] : []);
-    } catch (error) {
-      console.error('Error retrieving data:', error);
-    }
-  };
+  // const fetchGetOneItem = async () => {
+  //   try {
+  //     const key = 'Thu Nov 16 2023';
+  //     const value = await AsyncStorage.getItem(key);
+  //     setGetOneItem(value ? [[key, value]] : []);
+  //   } catch (error) {
+  //     console.error('Error retrieving data:', error);
+  //   }
+  // };
 
   useEffect(() => {
     fetchCounterHistory(); // 화면이 로드될 때 저장된 모든 값 불러오기
-    fetchCounterToday(); // 화면이 로드될 때 저장된 오늘의 카운트 값만 불러오기
-    fetchGetOneItem();
+    // fetchCounterToday(); // 화면이 로드될 때 저장된 오늘의 카운트 값만 불러오기
+    // fetchGetOneItem();
+    // retrieveCount(); // 화면이 로드될 때 저장된 모든 값 불러오기
   }, []);
+
+  const toggleShowHistory = () => {
+    setShowHistory(!showHistory); // 버튼 클릭 시 showHistory 상태를 토글
+    fetchCounterHistory(); // 상태 토글 시 저장된 모든 값 불러오기
+  };
 
   return (
     <View>
-      <Text>About 화면</Text>
+      {/* <Text>About 화면</Text> */}
       {/* <Text>Home에서 받은 카운터 값: {counter}</Text> */}
-      <Text>Counter History:</Text>
+      <Button title="디비 새로고침" onPress={toggleShowHistory} />
+      {/* <Text>Counter History:</Text> */}
+      {/* Counter History 출력 */}
       {counterHistory.map(([date, value]) => (
-        //{counterToday.map(([date, value]) => (
-        //{getOneItem.map(([date, value]) => (
         <Text key={date}>{`${date}: ${value}`}</Text>
       ))}
     </View>

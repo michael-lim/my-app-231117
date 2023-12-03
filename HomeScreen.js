@@ -3,14 +3,16 @@ import { StyleSheet, View, Text, TouchableOpacity, Dimensions, TextInput, Button
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BarChart } from 'react-native-chart-kit';
 import moment from "moment";
-import { Swipeable, GestureHandlerRootView, ScrollView, } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetModalProvider, BottomSheetModal, bottomSheetModalRef, } from '@gorhom/bottom-sheet';
-// import Icon from 'react-native-vector-icons/FontAwesome'; // 예시로 FontAwesome 아이콘을 사용
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Swipeable, GestureHandlerRootView, } from 'react-native-gesture-handler';
+import BottomSheet, { BottomSheetModalProvider, BottomSheetModal, } from '@gorhom/bottom-sheet';
+import { Ionicons } from '@expo/vector-icons';
+// import { resetCounters } from './SettingsScreen';
+
 
 const HomeScreen = () => {
 
   const [counter, setCounter] = useState(0);
+  const [counterTime, setCounterTime] = useState(1);
   const [counterYesterday, setCounterYesterday] = useState(0);
   const [lastCountDate, setLastCountDate] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(null);
@@ -22,12 +24,15 @@ const HomeScreen = () => {
   const bottomSheetModalRef = useRef(null);
 
 
+
   useEffect(() => {
+    // resetCounters();
     // saveCounter(); // 카운터 변경 시 저장
     retrieveCount(); //페이지 리로딩시 저장된 카운트수 가져옴
     getCounterYesterday();
-    // setLastCountDate(moment().format("YYYY-MM-DD HH:mm:ss"));
-    setLastCountDate(`${moment().format("YYYY-MM-DD")}\n   ${moment().format("HH:mm:ss")}`);
+
+    setLastCountDate(moment().format("YYYY-MM-DD HH:mm:ss"));
+    // setLastCountDate(`${moment().format("YYYY-MM-DD")}\n   ${moment().format("HH:mm:ss")}`);
     setElapsedTime(moment().diff(moment(lastCountDate), "seconds"));
     const intervalId = setInterval(() => {
       setElapsedTime(moment().diff(moment(lastCountDate), "seconds"));
@@ -35,6 +40,7 @@ const HomeScreen = () => {
     // 컴포넌트가 unmount될 때 타이머 해제
     return () => clearInterval(intervalId);
   }, [counter, counterYesterday]);
+
 
 
   useEffect(() => {
@@ -85,19 +91,51 @@ const HomeScreen = () => {
     const newCount = counter + 1;
     setCounter(newCount);
     saveCounter(newCount); // 카운트 증가할 때마다 AsyncStorage에 저장
+    setCounterTime(1);
+    saveCounterTime(1); // 카운트 증가할 때마다 AsyncStorage에 저장
+  };
+
+  const incrementCounterTime = () => {
+    const newCount = 1;
+    setCounterTime(newCount);
+    saveCounterTime(newCount); // 카운트 증가할 때마다 AsyncStorage에 저장
   };
 
   const saveCounter = async (counter) => {
     try {
       const today = new Date();
       const year = today.getFullYear();
-      const month = today.getMonth() + 1;
-      const date = today.getDate();
+      // const month = today.getMonth() + 1;
+      // const date = today.getDate();
+      const month = String(today.getMonth() + 1).padStart(2, '0'); // 월을 두 자리로 변환
+      const date = String(today.getDate()).padStart(2, '0'); // 일을 두 자리로 변환
       const currentDate = year + "-" + month + "-" + date;
+      // console.log(currentDate);
       await AsyncStorage.setItem(currentDate, counter.toString());
+
       setLastCountDate(moment().format("YYYY-MM-DD HH:mm:ss"));
       setElapsedTime(moment().diff(moment(lastCountDate), "seconds"));
+      // saveCounterTime();
 
+    } catch (error) {
+      console.error('Error saving data:', error);
+    }
+  };
+
+  const saveCounterTime = async (counter) => {
+    try {
+      const today = new Date();
+      const year = today.getFullYear();
+      // const month = today.getMonth() + 1;
+      // const date = today.getDate();
+      const month = String(today.getMonth() + 1).padStart(2, '0'); // 월을 두 자리로 변환
+      const date = String(today.getDate()).padStart(2, '0'); // 일을 두 자리로 변환
+      // const hours = today.getHours();
+      const hours = String(today.getHours()).padStart(2, '0'); // 시간을 두 자리로 변환
+      const minutes = String(today.getMinutes()).padStart(2, '0');
+      const seconds = String(today.getSeconds()).padStart(2, '0');
+      const currentDate = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
+      await AsyncStorage.setItem(currentDate, counterTime.toString());
     } catch (error) {
       console.error('Error saving data:', error);
     }
@@ -107,8 +145,11 @@ const HomeScreen = () => {
     try {
       const today = new Date();
       const year = today.getFullYear();
-      const month = today.getMonth() + 1;
-      const date = today.getDate();
+      // const month = today.getMonth() + 1;
+      // const date = today.getDate();
+      const month = String(today.getMonth() + 1).padStart(2, '0'); // 월을 두 자리로 변환
+      const date = String(today.getDate()).padStart(2, '0'); // 일을 두 자리로 변환
+
       const currentDate = `${year}-${month}-${date}`;
       const savedCount = await AsyncStorage.getItem(currentDate);
 
@@ -131,8 +172,10 @@ const HomeScreen = () => {
       yesterday.setDate(today.getDate() - 1);
 
       const year = yesterday.getFullYear();
-      const month = yesterday.getMonth() + 1;
-      const date = yesterday.getDate();
+      // const month = yesterday.getMonth() + 1;
+      // const date = yesterday.getDate();
+      const month = String(yesterday.getMonth() + 1).padStart(2, '0'); // 월을 두 자리로 변환
+      const date = String(yesterday.getDate()).padStart(2, '0'); // 일을 두 자리로 변환
       const yesterdayDate = year + "-" + month + "-" + date;
 
       const savedCount = await AsyncStorage.getItem(yesterdayDate);
@@ -144,6 +187,7 @@ const HomeScreen = () => {
     }
   }
 
+  // 경과시간 계산
   const displayElapsedTime = () => {
     let display = '';
     const years = Math.floor(elapsedTime / 31536000);
@@ -207,7 +251,6 @@ const HomeScreen = () => {
       return;
     }
 
-
     if (isNaN(inputCount) || inputCount < 0) {
       alert('유효한 숫자를 입력해주세요.');
       return;
@@ -257,13 +300,13 @@ const HomeScreen = () => {
                   // 양수일 때
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={{ ...styles.counterValue, color: 'red' }}>{counter - counterYesterday}</Text>
-                    <Icon name="arrow_upward" size={20} color="red" />
+                    <Ionicons name="arrow-up" size={20} color="red" />
                   </View>
                 ) : (
                   // 음수일 때
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={{ ...styles.counterValue, color: 'blue' }}>{counter - counterYesterday}</Text>
-                    <Icon name="arrow_downward" size={20} color="blue" />
+                    <Ionicons name="arrow-down" size={20} color="blue" />
                   </View>
                 )}
               </View>
@@ -426,6 +469,7 @@ const HomeScreen = () => {
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.circularButton} onPress={incrementCounter}>
+
               <Text style={styles.buttonText}>+</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.circularButtonInput} onPress={() => bottomSheetModalRef.current?.present()}>
@@ -451,7 +495,7 @@ const HomeScreen = () => {
                   <TextInput
                     style={styles.textInput}
                     onChangeText={(text) => setInputCount(text)}
-                    value={inputCount}
+                    value={inputCount.toString()}
                     keyboardType="numeric"
                     placeholder="카운트 입력"
                   />
@@ -627,3 +671,4 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+// export const retrieveCount = () => {};
