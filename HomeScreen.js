@@ -431,7 +431,8 @@ const HomeScreen = () => {
                 {/* <Text>이번주</Text> */}
                 <BarChart
                   data={{
-                    labels: weeksData[currentWeekIndex]?.map((entry) => entry.date) || [],
+                    labels: weeksData[currentWeekIndex]?.map((entry) => moment(entry.date).format('MM-DD')) || [],
+                    // labels: weeksData.map((entry) => moment(entry.date).format('MM-DD')), // moment.js를 사용하여 날짜 형식 변경
                     datasets: [
                       {
                         data: weeksData[currentWeekIndex]?.map((entry) => entry.value) || [],
@@ -444,7 +445,7 @@ const HomeScreen = () => {
                   // yAxisInterval={100} // optional, defaults to 1
                   fromZero
                   withInnerLines
-                  verticalLabelRotation={-90}
+                  // verticalLabelRotation={-90}
                   showValuesOnTopOfBars
                   chartConfig={{
 
@@ -452,6 +453,7 @@ const HomeScreen = () => {
                     backgroundGradientFrom: '#0377fc',
                     backgroundGradientTo: '#0377fc',
                     decimalPlaces: 0,
+                    propsForLabels: { fontSize: 12, margin: 0, fontWeight: 'bold' }, // Establece margin en 0 o null
                     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                     style: {
                       borderRadius: 16,
