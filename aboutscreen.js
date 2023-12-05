@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ScrollView } from 'react-native-gesture-handler';
 // import { retrieveCount } from './HomeScreen';
 
 const AboutScreen = () => {
@@ -83,16 +84,19 @@ const AboutScreen = () => {
   };
 
   return (
-    <View>
-      {/* <Text>About 화면</Text> */}
-      {/* <Text>Home에서 받은 카운터 값: {counter}</Text> */}
-      <Button title="디비 새로고침" onPress={toggleShowHistory} />
-      {/* <Text>Counter History:</Text> */}
-      {/* Counter History 출력 */}
-      {counterHistory.map(([date, value]) => (
-        <Text key={date}>{`${date}: ${value}`}</Text>
-      ))}
-    </View>
+    <ScrollView>
+      <View>
+        {/* <Text>About 화면</Text> */}
+        {/* <Text>Home에서 받은 카운터 값: {counter}</Text> */}
+        <Button title="디비 새로고침" onPress={toggleShowHistory} />
+        {/* <Text>Counter History:</Text> */}
+        {/* Counter History 출력 */}
+        {counterHistory.map(([date, value]) => (
+          <Text key={date}>{`${date}: ${value}`}</Text>
+        ))}
+      </View>
+    </ScrollView>
+
   );
 };
 

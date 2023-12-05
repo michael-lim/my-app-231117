@@ -1,142 +1,194 @@
-// import React, { useState, useEffect } from 'react';
-// import { View, Text } from 'react-native';
-// import { PieChart } from 'react-native-chart-kit';
-// import moment from 'moment';
-
-// const NoSmokingScreen = () => {
-//   const stages = [
-//     { label: '20분', duration: 20 },
-//     { label: '12시간', duration: 12 * 60 },
-//     { label: '3개월', duration: 3 * 30 * 24 * 60 },
-//     { label: '9개월', duration: 9 * 30 * 24 * 60 },
-//     { label: '1년', duration: 365 * 24 * 60 },
-//     { label: '5년', duration: 5 * 365 * 24 * 60 },
-//     { label: '10년', duration: 10 * 365 * 24 * 60 },
-//     { label: '15년', duration: 15 * 365 * 24 * 60 },
-//   ];
-
-//   const [elapsedMinutes, setElapsedMinutes] = useState(0);
-
-//   useEffect(() => {
-//     const interval = setInterval(() => {
-//       setElapsedMinutes((prevMinutes) => prevMinutes + 1);
-//     }, 60000);
-
-//     return () => clearInterval(interval);
-//   }, []);
-
-//   const charts = stages.map((stage, index) => {
-//     const currentStageIndex = index;
-//     const currentStage = stages[currentStageIndex];
-
-//     const data = stages.map((stage, i) => ({
-//       name: stage.label,
-//       value: i <= currentStageIndex ? 1 : 0,
-//       color: i <= currentStageIndex ? `rgba(0, 128, 0, 0.6)` : `rgba(211, 211, 211, 0.6)`,
-//     }));
-
-//     return (
-//       <View key={index} style={{ alignItems: 'center', marginTop: 20 }}>
-//         <Text>{currentStage.label} 경과 상황</Text>
-//         <PieChart
-//           data={data}
-//           width={200}
-//           height={200}
-//           chartConfig={{
-//             backgroundGradientFrom: '#1E2923',
-//             backgroundGradientTo: '#08130D',
-//             color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-//           }}
-//           accessor="value"
-//           backgroundColor="transparent"
-//           paddingLeft="15"
-//           absolute
-//         />
-//       </View>
-//     );
-//   });
-
-//   return (
-//     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-//       {charts}
-//     </View>
-//   );
-// };
-
-// export default NoSmokingScreen;
+import React, { useState, useEffect} from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
+import { startTimer } from './NSProgressScreen';
+// import { useNavigation } from '@react-navigation/native';
 
 
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button } from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
-import moment from 'moment';
 
-const NoSmokingScreen = () => {
-  const stages = [
-    { label: '20분', duration: 20 },
-    { label: '12시간', duration: 12 * 60 },
-    { label: '3개월', duration: 3 * 30 * 24 * 60 },
-    { label: '9개월', duration: 9 * 30 * 24 * 60 },
-    { label: '1년', duration: 365 * 24 * 60 },
-    { label: '5년', duration: 5 * 365 * 24 * 60 },
-    { label: '10년', duration: 10 * 365 * 24 * 60 },
-    { label: '15년', duration: 15 * 365 * 24 * 60 },
-  ];
+const SmokingCessationApp = ({navigation}) => {
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedDay, setSelectedDay] = useState("");
+  const [selectedHour, setSelectedHour] = useState("");
 
-  const [elapsedMinutes, setElapsedMinutes] = useState(0);
+  // const navigation = useNavigation();
 
-  useEffect(() => {
-    // 특정 시간 간격마다 elapsedMinutes 갱신
-    const interval = setInterval(() => {
-      setElapsedMinutes((prevMinutes) => prevMinutes + 1);
-    }, 60000); // 1분마다 증가하도록 설정 (밀리초 단위)
+  const toggleModal = () => {
+    setModalVisible(!modalVisible);
+  };
 
-    return () => clearInterval(interval); // 컴포넌트가 unmount될 때 interval clear
-  }, []);
-
-  const currentStageIndex = stages.findIndex((stage) => elapsedMinutes < stage.duration);
-
-
-  const data = stages.map((stage, index) => ({
-    name: stage.label,
-    value: index <= currentStageIndex ? 1 : 0,
-    color: index <= currentStageIndex ? `rgba(0, 128, 0, 0.6)` : `rgba(211, 211, 211, 0.6)`,
-  }));
-
-  // const charts = stages.map((stage, index) => {
-  //   const currentStageIndex = index;
-  //   const currentStage = stages[currentStageIndex];
-
-  //   const data = stages.map((stage, i) => ({
-  //     name: stage.label,
-  //     value: i <= currentStageIndex ? 1 : 0,
-  //     color: i <= currentStageIndex ? `rgba(0, 128, 0, 0.6)` : `rgba(211, 211, 211, 0.6)`,
-  //   }));
-  // });
+  const MoveToProgressScreen = () => {
+    // startTimer();
+    navigation.navigate('NSProgressScreen', { functionName: startTimer }); // 'NSProgress'는 다른 스크린(페이지)의 이름
+    
+  };
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ marginBottom: 20 }}>금연을 시작하고 지난 시간: {elapsedMinutes}분</Text>
-      <PieChart
-        data={data}
-        width={450}
-        height={300}
-        chartConfig={{
-          backgroundGradientFrom: '#1E2923',
-          backgroundGradientTo: '#08130D',
-          color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+    <View style={styles.container}>
+      <View style={styles.iconContainer}>
+        <MaterialIcons style={styles.iconText} name="smoke-free" size={24} color="black" />
+      </View>
+      <View style={styles.buttonContainer}>
+        <View style={styles.explainContainer}>
+          <Text style={styles.explainText}>금연을 시작하고 건강 상태 변화를 알아보세요</Text>
+        </View>
+        <TouchableOpacity style={styles.button} onPress={MoveToProgressScreen}>
+          <Text style={styles.buttonText}>지금부터 금연시작</Text>
+        </TouchableOpacity>
+        <View style={styles.explainContainer}>
+          <Text style={styles.explainText}>이미 금연중이라면</Text>
+        </View>
+        <TouchableOpacity style={[styles.button, styles.secondButton]} onPress={toggleModal}>
+          <Text style={styles.buttonText}>금연 시작 날짜 설정하기</Text>
+        </TouchableOpacity>
+      </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
         }}
-        accessor="value"
-        backgroundColor="transparent"
-        paddingLeft="15"
-        absolute
-      />
-      <Text style={{ marginTop: 20 }}>
-        {currentStageIndex === -1 ? '모든 단계를 완료하셨습니다!' : `현재 ${stages[currentStageIndex].label} 단계입니다.`}
-      </Text>
-      <Button title="금연 시작" onPress={() => setElapsedMinutes(0)} />
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.explainText}>금연 시작 날짜 설정</Text>
+            <Text>금연 시작 날짜를 선택해주세요.</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                style={styles.picker}
+                selectedValue={selectedYear}
+                onValueChange={(itemValue, itemIndex) => setSelectedYear(itemValue)}
+                itemStyle={styles.pickerItem}>
+                {Array.from({ length: 21 }, (_, index) => {
+                  const year = 2010 + index;
+                  return <Picker.Item key={index} label={`${year}`} value={`${year}`} />;
+                })}
+              </Picker>
+              <Picker
+                style={styles.picker}
+                selectedValue={selectedMonth}
+                onValueChange={(itemValue, itemIndex) => setSelectedMonth(itemValue)}
+                itemStyle={styles.pickerItem}>
+                {Array.from({ length: 12 }, (_, index) => {
+                  const month = index + 1;
+                  return <Picker.Item key={index} label={`${month}월`} value={`${month}`} />;
+                })}
+              </Picker>
+              <Picker
+                style={styles.picker}
+                selectedValue={selectedDay}
+                onValueChange={(itemValue, itemIndex) => setSelectedDay(itemValue)}
+                itemStyle={styles.pickerItem}>
+                {Array.from({ length: 31 }, (_, index) => {
+                  const day = index + 1;
+                  return <Picker.Item key={index} label={`${day}일`} value={`${day}`} />;
+                })}
+              </Picker>
+              <Picker
+                style={styles.picker}
+                selectedValue={selectedHour}
+                onValueChange={(itemValue, itemIndex) => setSelectedHour(itemValue)}
+                itemStyle={styles.pickerItem}>
+                {Array.from({ length: 25 }, (_, index) => {
+                  return <Picker.Item key={index} label={`${index}시`} value={`${index}`} />;
+                })}
+              </Picker>
+            </View>
+            <TouchableOpacity onPress={toggleModal}>
+              <Text style={styles.modalCloseText}>완료</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
-export default NoSmokingScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  iconContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconText: {
+    fontSize: 150,
+  },
+  buttonContainer: {
+    marginBottom: 50,
+    width: '80%',
+  },
+  explainContainer: {
+    alignItems: 'center',
+  },
+  explainText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    marginBottom: 50,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  secondButton: {
+    backgroundColor: '#4CAF50',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  pickerContainer: {
+    // width: 500,
+    flexDirection: 'row', // Picker 요소들을 가로로 나열
+    justifyContent: 'space-between', // 가로 방향으로 공간을 동일하게 분배하여 요소 배치
+    alignItems: 'center', // 요소들을 세로 방향에서 가운데로 정렬
+  },
+  picker: {
+    width: '35%', // 필요에 따라 조절 가능한 너비
+  },
+  pickerItem: {
+    fontSize: 15, // 원하는 글꼴 크기로 조정
+  },
+  modalCloseText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
+    color: 'blue',
+  },
+});
+
+export default SmokingCessationApp;

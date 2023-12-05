@@ -3,18 +3,21 @@ import { StyleSheet } from 'react-native';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-
 import HomeScreen from './HomeScreen';
 import AboutScreen from './aboutscreen';
 import SettingsScreen from './SettingsScreen';
 import GraphScreen from './GraphScreen';
 import CalendarScreen from './CalendarScreen';
 import NoSmokingScreen from './NoSmokingScreen';
+import NSProgressScreen from './NSProgressScreen';
 
 const Tab = createBottomTabNavigator();
 
-function MyTabs() {
+const Stack = createStackNavigator();
+
+function MainBottomTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -57,7 +60,10 @@ function MyTabs() {
 const App = () => {
   return (
     <NavigationContainer>
-      <MyTabs />
+      <Stack.Navigator>
+        <Stack.Screen name="Main" component={MainBottomTabNavigator}  />
+        <Stack.Screen name="NSProgressScreen" component={NSProgressScreen} />
+      </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
   );

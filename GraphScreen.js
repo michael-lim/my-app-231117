@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import { ScrollView } from 'react-native-gesture-handler';
 import { GestureHandlerRootView, } from 'react-native-gesture-handler';
-import { BarChart, LineChart, } from 'react-native-chart-kit';
+import { LineChart, } from 'react-native-chart-kit';
 
 const GraphScreen = () => {
   const [dailyData, setDailyData] = useState([]);
@@ -118,6 +118,8 @@ const GraphScreen = () => {
               backgroundGradientTo: '#fff',
               decimalPlaces: 0,
               propsForLabels: { fontSize: 12, margin: 0, fontWeight: 'bold' }, // Establece margin en 0 o null
+              // barPercentage: 0.5,
+              // useShadowColorFromDataset: false, // optional
               // strokeWidth: 3,
               color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
               style: {
