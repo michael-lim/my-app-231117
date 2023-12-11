@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, } from 'react';
 import { View, StyleSheet, Text, ScrollView } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
+import { Animated } from 'react-native';
+// import { MainBottomTabNavigator} from './App';
+
+const animatedValue = new Animated.Value(0);
+animatedValue.addListener(() => {
+  // empty listener
+});
+
 
 const NSProgressScreen = ({ route }) => {
 
   const functionName = route.params?.functionName;
   const { selectedDate } = route.params;
 
+  const timerProgress = useRef(0); // useRef를 사용하여 타이머 진행 상태 저장
 
   const TimerChart = ({ duration, title, description, chartWidth = 190, chartHeight = 120, chartFontSize = 15, textFontSize = 15 }) => {
 
@@ -166,7 +175,9 @@ const NSProgressScreen = ({ route }) => {
           <TimerChart key={index} duration={step.duration} title={step.title} description={step.description} />
         ))}
       </ScrollView>
+      {/* <MainBottomTabNavigator /> */}
     </View>
+    
 
   );
 };
