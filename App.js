@@ -51,6 +51,7 @@ function MainBottomTabNavigator() {
       <Tab.Screen name="달력" component={CalendarScreen} />
       <Tab.Screen name="통계" component={GraphScreen} />
       <Tab.Screen name="금연" component={NoSmokingScreen} />
+      {/* <Tab.Screen name="금연진행상황" component={NSProgressScreen} /> */}
       <Tab.Screen name="설정" component={SettingsScreen} />
       <Tab.Screen name="임시" component={AboutScreen} />
     </Tab.Navigator>
@@ -64,6 +65,7 @@ const App = () => {
         <Stack.Screen name="Main" component={MainBottomTabNavigator}  />
         <Stack.Screen name="NSProgressScreen" component={NSProgressScreen} />
       </Stack.Navigator>
+      {/* <MainBottomTabNavigator /> */}
       <StatusBar style="auto" />
     </NavigationContainer>
   );

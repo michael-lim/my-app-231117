@@ -1,19 +1,21 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
-import { startTimer } from './NSProgressScreen';
-// import { useNavigation } from '@react-navigation/native';
+// import { startTimer } from './NSProgressScreen';
+// import NSProgressScreen from './NSProgressScreen';
+// import { startTimer } from './NSProgressScreen';
 
+const SmokingCessationApp = ({ navigation }) => {
 
-
-const SmokingCessationApp = ({navigation}) => {
-  
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedHour, setSelectedHour] = useState("");
+
+  // const [progress, setProgress] = useState(0);
+  // const [timerRunning, setTimerRunning] = useState(false);
 
   // const navigation = useNavigation();
 
@@ -22,10 +24,35 @@ const SmokingCessationApp = ({navigation}) => {
   };
 
   const MoveToProgressScreen = () => {
-    // startTimer();
     navigation.navigate('NSProgressScreen', { functionName: startTimer }); // 'NSProgress'는 다른 스크린(페이지)의 이름
+  }
+
+  const MoveToProgressScreenWithParam = () => {
+
+    const selectedDate = new Date(`${selectedYear}-${selectedMonth.padStart(2, '0')}-${selectedDay.padStart(2, '0')}T${selectedHour.padStart(2, '0')}:00:00`);
+    // console.log(selectedDate);
     
-  };
+    // 현재 날짜와 선택한 날짜 사이의 차이를 계산하여 타이머 시작 시간으로 설정
+    const currentTime = new Date().getTime();
+    const selectedTime = selectedDate.getTime();
+    const timeDifference = selectedTime - currentTime;
+
+    // 선택한 날짜가 현재 시간보다 이전인 경우에만 타이머 시작
+    if (timeDifference < 0) {
+      // startTimer(timeDifference);
+      // startTimer(-timeDifference);
+      
+      // 타이머가 시작되면 NSProgressScreen으로 이동
+      // navigation.navigate('NSProgressScreen', { functionName: startTimer(timeDifference) });
+      // navigation.navigate('NSProgressScreen', { functionName: startTimer });
+      navigation.navigate('NSProgressScreen', { selectedDate });
+      // console.log(timeDifference);
+      toggleModal(); // 모달 닫기
+    } else {
+      alert('유효한 날짜를 선택해주세요.');
+      toggleModal(); // 모달 닫기
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -99,8 +126,8 @@ const SmokingCessationApp = ({navigation}) => {
                 })}
               </Picker>
             </View>
-            <TouchableOpacity onPress={toggleModal}>
-              <Text style={styles.modalCloseText}>완료</Text>
+            <TouchableOpacity onPress={toggleModal} >
+              <Text style={styles.modalCloseText} onPress={MoveToProgressScreenWithParam}>완료</Text>
             </TouchableOpacity>
           </View>
         </View>
