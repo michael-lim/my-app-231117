@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import HomeScreen from './HomeScreen';
+import HomeScreen from './screens/HomeScreen';
 import AboutScreen from './aboutscreen';
 import SettingsScreen from './SettingsScreen';
 import GraphScreen from './GraphScreen';
@@ -26,7 +26,7 @@ function MainBottomTabNavigator() {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           if (route.name === '홈') {
-            iconName = focused ? 'home' : 'home-outline'; // 아이콘 이름은 해당 라이브러리에 따라 다를 수 있습니다.
+            iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === '달력') {
             iconName = focused ? 'calendar' : 'calendar-outline';
           }

@@ -1,5 +1,5 @@
-import React, {useState, } from 'react';
-import { View, Text, StyleSheet, Linking, Modal,  TouchableOpacity, } from 'react-native';
+import React, { useState, } from 'react';
+import { View, Text, StyleSheet, Linking, Modal, TouchableOpacity, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScrollView } from 'react-native-gesture-handler';
 import * as MailComposer from 'expo-mail-composer';
@@ -112,16 +112,32 @@ const SettingsScreen = () => {
   };
 
   const updateNoSmokingDate = async () => {
-    const formattedDate = `${selectedYear}-${selectedMonth.padStart(2, '0')}-${selectedDay.padStart(2, '0')}T${selectedHour.padStart(2, '0')}:00:00`;
+    // const formattedDate = `${selectedYear}-${selectedMonth.padStart(2, '0')}-${selectedDay.padStart(2, '0')}T${selectedHour.padStart(2, '0')}:00:00`;
+    // try {
+    //   await AsyncStorage.setItem('noSmoking', formattedDate);
+    //   alert('금연 시작 날짜가 업데이트되었습니다.');
+    //   toggleModal(); // 모달 닫기
+    // } catch (error) {
+    //   console.error('Error updating noSmoking date:', error);
+    //   toggleModal(); // 모달 닫기
+    // }
 
     try {
-      await AsyncStorage.setItem('noSmoking', formattedDate);
-      alert('금연 시작 날짜가 업데이트되었습니다.');
-      toggleModal(); // 모달 닫기
+      const keys = await AsyncStorage.getAllKeys(); // 모든 AsyncStorage 키를 가져옴
+      const recordsToDelete = keys.filter(key => key.includes('noSmoking')); // 'noSmoking' 문자열을 포함하는 모든 키를 찾음
+      if (recordsToDelete.length > 0) {
+        await AsyncStorage.setItem('noSmoking', formattedDate);
+        alert('금연 시작 날짜가 업데이트되었습니다.');
+        toggleModal(); // 모달 닫기
+      } else {
+        alert('금연 기록이 없습니다.');
+      }
     } catch (error) {
-      console.error('Error updating noSmoking date:', error);
+      console.error('Error resetting no smoking records:', error);
       toggleModal(); // 모달 닫기
     }
+
+
   };
 
   const handleOptionPress = (option) => {
@@ -208,8 +224,8 @@ const SettingsScreen = () => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.explainText}>금연 시작 날짜 설정</Text>
-            <Text>금연 시작 날짜를 선택해주세요.</Text>
+            <Text style={styles.explainText}>금연 시작 날짜 변경</Text>
+            <Text>금연 시작 변경 날짜를 선택해주세요.</Text>
             <View style={styles.pickerContainer}>
               <Picker
                 style={styles.picker}
@@ -251,9 +267,16 @@ const SettingsScreen = () => {
                 })}
               </Picker>
             </View>
+            <View style={styles.modalCloseBox}>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalCloseText}>취소</Text>
+            </TouchableOpacity>
+            <View style={{ width: 100 }} />
             <TouchableOpacity onPress={toggleModal} >
               <Text style={styles.modalCloseText} onPress={updateNoSmokingDate}>완료</Text>
             </TouchableOpacity>
+            </View>
+            
           </View>
         </View>
       </Modal>
@@ -328,7 +351,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: 'blue',
   },
-
+  modalCloseBox: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+  }
 });
 
 export default SettingsScreen;

@@ -32,7 +32,7 @@ const NSProgressScreen = ({ route }) => {
     // }, [duration]);
 
     useEffect(() => {
-      console.log(selectedDate);
+      // console.log(selectedDate);
       const interval = setInterval(() => {
         const currentTime = new Date();
         const elapsedTime = currentTime.getTime() - selectedDate.getTime(); // 시작 시간으로부터 경과한 시간
@@ -144,7 +144,10 @@ const NSProgressScreen = ({ route }) => {
 
 
   const activeStep = steps.reduce((acc, curr) => {
-    if (curr.duration > 0 && curr.duration < acc.duration) {
+    // 이미 종료된 단계는 제외
+    const elapsedTime = new Date().getTime() - selectedDate.getTime();
+    if (curr.duration > elapsedTime && curr.duration < acc.duration) {
+      // if (curr.duration > 0 && curr.duration < acc.duration) {
       return curr;
     }
     return acc;
@@ -177,7 +180,7 @@ const NSProgressScreen = ({ route }) => {
       </ScrollView>
       {/* <MainBottomTabNavigator /> */}
     </View>
-    
+
 
   );
 };

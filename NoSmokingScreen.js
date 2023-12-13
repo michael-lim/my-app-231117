@@ -18,7 +18,7 @@ const SmokingCessationApp = ({ navigation }) => {
 
   const saveNoSmokingDate = async () => {
     const formattedDate = `${selectedYear}-${selectedMonth.padStart(2, '0')}-${selectedDay.padStart(2, '0')}T${selectedHour.padStart(2, '0')}:00:00`;
-    
+
     try {
       await AsyncStorage.setItem('noSmoking', formattedDate);
       // 예외 처리 등을 원하시는 대로 추가하세요
@@ -28,7 +28,9 @@ const SmokingCessationApp = ({ navigation }) => {
   };
 
   const MoveToProgressScreen = () => {
-    navigation.navigate('NSProgressScreen', { functionName: startTimer }); // 'NSProgress'는 다른 스크린(페이지)의 이름
+    // navigation.navigate('NSProgressScreen', { functionName: startTimer }); // 'NSProgress'는 다른 스크린(페이지)의 이름
+    const selectedDate = new Date();
+    navigation.navigate('NSProgressScreen', { selectedDate });
   }
 
   const MoveToProgressScreenWithParam = () => {
@@ -124,9 +126,15 @@ const SmokingCessationApp = ({ navigation }) => {
                 })}
               </Picker>
             </View>
-            <TouchableOpacity onPress={toggleModal} >
-              <Text style={styles.modalCloseText} onPress={MoveToProgressScreenWithParam}>완료</Text>
-            </TouchableOpacity>
+            <View style={styles.modalCloseBox}>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text style={styles.modalCloseText}>취소</Text>
+              </TouchableOpacity>
+              <View style={{ width: 100 }} /> 
+              <TouchableOpacity onPress={toggleModal} >
+                <Text style={styles.modalCloseText} onPress={MoveToProgressScreenWithParam}>완료</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -215,6 +223,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: 'blue',
   },
+  modalCloseBox: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+  }
 });
 
 export default SmokingCessationApp;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from 'react-native-calendars';
+import moment from 'moment';
 
 const CalendarSmoking = () => {
   const [markedDates, setMarkedDates] = useState({});
@@ -13,14 +14,12 @@ const CalendarSmoking = () => {
       try {
         const allKeys = await AsyncStorage.getAllKeys();
         const allData = await AsyncStorage.multiGet(allKeys);
-
         const markedDatesData = {};
         allData.forEach(([key, value]) => {
           const chartData = allData.map(([key, value]) => ({
             date: key, // 날짜
             value: parseInt(value), // 저장된 값
           }));
-
           markedDatesData[key] = {
             selected: true,
             marked: true,
@@ -35,10 +34,8 @@ const CalendarSmoking = () => {
               },
             ],
           };
-
         });
         setMarkedDates(markedDatesData);
-
       } catch (error) {
         console.error('Error retrieving data:', error);
       }
@@ -51,25 +48,18 @@ const CalendarSmoking = () => {
       const allKeys = await AsyncStorage.getAllKeys();
       const allData = await AsyncStorage.multiGet(allKeys);
       const dateDataList = [];
-
       const storedData = await AsyncStorage.getItem(day.dateString);
-
       setSelectedDateCount(storedData ? parseInt(storedData) : 0);
-
-
-
       if (storedData) {
         allData.forEach(([key, value]) => {
           const chartData = allData.map(([key, value]) => ({
             date: key, // 날짜
             value: parseInt(value), // 저장된 값
           }));
-          // console.log(chartData);
-
+          // const filteredKeys = allKeys.filter((key) => moment(key, 'YYYY-MM-DD HH:mm:ss', true).isValid());
           // 선택한 날짜만 시간정보를 뿌려주는 부분인데 느리다. 고쳐야 한다.
           if (key.split(' ')[0] === day.dateString)
             setSelectedDateData([]);
-
           if (key.split(' ')[0] === day.dateString && isValidDate(key)) {
             const dateDetail = { date: key, value };
             dateDataList.push(dateDetail);
@@ -79,12 +69,10 @@ const CalendarSmoking = () => {
       } else {
         setSelectedDateData([]);
       };
-
     } catch (error) {
       console.error('Error retrieving data for selected date:', error);
     }
   };
-
   // 정확한 날짜 및 시간 형식인지 확인하는 함수
   const isValidDate = (dateString) => {
     const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -112,19 +100,14 @@ const CalendarSmoking = () => {
 };
 
 const styles = StyleSheet.create({
-titleText:{
-  fontSize: 25,
-  // textAlign: 'center', // 가운데 정렬을 위한 textAlign 속성 추가
-  // justifyContent: 'center',
-  // alignItems: 'center',
-  marginTop: 10,
-  marginBottom: 10,
-
-},
-detailedText:{
-  fontSize: 15,
-  // textAlign: 'center', // 가운데 정렬을 위한 textAlign 속성 추가
-},
+  titleText: {
+    fontSize: 25,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  detailedText: {
+    fontSize: 15,
+  },
 })
 
 export default CalendarSmoking;
