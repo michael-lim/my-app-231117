@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Dimensions, TextInput, Button, KeyboardAvoidingView, } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Dimensions, TextInput, Button, KeyboardAvoidingView, Platform, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BarChart } from 'react-native-chart-kit';
 import moment from "moment";
-import { Swipeable, GestureHandlerRootView, } from 'react-native-gesture-handler';
+import { Swipeable, GestureHandlerRootView, ScrollView, } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetModalProvider, BottomSheetModal, } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 // import { resetCounters } from './SettingsScreen';
+// import { useNavigation } from '@react-navigation/native';
+
 
 const HomeScreen = () => {
+  const windowHeight = Dimensions.get('window').height;
+
+  // const navigation = useNavigation();
+
   const [counter, setCounter] = useState(0);
   const [counterTime, setCounterTime] = useState(1);
   const [counterYesterday, setCounterYesterday] = useState(0);
@@ -17,7 +24,7 @@ const HomeScreen = () => {
   const [dailyData, setDailyData] = useState([]);
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [weeksData, setWeeksData] = useState([]);
-  const [inputCount, setInputCount] = useState(0);
+  const [inputCount, setInputCount] = useState('');
   const [inputDate, setInputDate] = useState('');
   const bottomSheetModalRef = useRef(null);
 
@@ -68,8 +75,8 @@ const HomeScreen = () => {
     const newCount = counter + 1;
     setCounter(newCount);
     saveCounter(newCount); // 카운트 증가할 때마다 AsyncStorage에 저장
-    // setCounterTime(1);
-    saveCounterTime();
+
+    // saveCounterTime();
   };
 
   const saveCounter = async (counter) => {
@@ -82,7 +89,7 @@ const HomeScreen = () => {
       await AsyncStorage.setItem(currentDate, counter.toString());
       retrieveLastCountDate(); //저장시 최종흡연일자 업데이트
       fetchWeeklyData(); //저장시 그래프 업데이트
-      // saveCounterTime();
+      saveCounterTime();
     } catch (error) {
       console.error('Error saving data:', error);
     }
@@ -151,17 +158,16 @@ const HomeScreen = () => {
     try {
       await AsyncStorage.removeItem('EXPO_CONSTANTS_INSTALLATION_ID'); //expo특정문자열 삭제용-임시
       const keys = await AsyncStorage.getAllKeys();
-
-      if (keys.length > 0) {
-        keys.sort(); // 키를 정렬하여 최신 값을 가져올 수 있도록 함
-        const latestKey = keys[keys.length - 1]; // keys 배열에서 가장 마지막(최신) 키 가져오기
+      // Filter keys to include only date-formatted keys
+      const dateKeys = keys.filter((key) => moment(key, 'YYYY-MM-DD HH:mm:ss', true).isValid());
+      if (dateKeys.length > 0) {
+        dateKeys.sort(); // 키를 정렬하여 최신 값을 가져올 수 있도록 함
+        const latestKey = dateKeys[dateKeys.length - 1]; // keys 배열에서 가장 마지막(최신) 키 가져오기
         const storedLastCountDate = await AsyncStorage.getItem(latestKey);
         if (storedLastCountDate !== null) {
           const date = latestKey.split(' ')[0]; // 날짜 부분 추출
           const time = latestKey.split(' ')[1]; // 시간 부분 추출
           setLastCountDate(`${date}\n   ${time}`);
-          // setLastCountDate(latestKey);
-          // setLastCountDate(`${moment().format("YYYY-MM-DD")}\n   ${moment().format("HH:mm:ss")}`);
         }
       } else {
         // AsyncStorage에 저장된 데이터가 없을 경우 처리
@@ -215,9 +221,12 @@ const HomeScreen = () => {
   const calculateElapsedTime = async () => {
     try {
       const keys = await AsyncStorage.getAllKeys();
-      if (keys.length > 0) {
-        keys.sort(); // 키를 정렬하여 최신 값을 가져올 수 있도록 함
-        const latestKey = keys[keys.length - 1]; // keys 배열에서 가장 마지막(최신) 키 가져오기
+
+      const dateKeys = keys.filter((key) => moment(key, 'YYYY-MM-DD HH:mm:ss', true).isValid());
+
+      if (dateKeys.length > 0) {
+        dateKeys.sort(); // 키를 정렬하여 최신 값을 가져올 수 있도록 함
+        const latestKey = dateKeys[dateKeys.length - 1]; // keys 배열에서 가장 마지막(최신) 키 가져오기
         const storedLastCountDate = await AsyncStorage.getItem(latestKey);
         if (storedLastCountDate !== null) {
           // const lastCountDateTime = moment(storedLastCountDate, 'YYYY-MM-DD HH:mm:ss');
@@ -227,8 +236,9 @@ const HomeScreen = () => {
         }
       } else {
         // AsyncStorage에 저장된 데이터가 없을 경우 처리
-        // console.log('No data found in AsyncStorage');
+        console.log('No data found in AsyncStorage');
         setElapsedTime(0); // 데이터가 없으므로 경과 시간을 0으로 설정
+        clearAllData();
       }
     } catch (error) {
       console.error('Error calculating elapsedTime:', error);
@@ -258,6 +268,32 @@ const HomeScreen = () => {
   // const handleDateChange = (text) => {
   //   setInputDate(text);
   // };
+
+  const handleDateChange = (text) => {
+    // 사용자가 '-'를 입력한 경우 무시하고 그대로 출력
+    if (text.endsWith('-')) {
+      setInputDate(text);
+      return;
+    }
+
+    // 입력된 텍스트에 '-' 제거
+    const formattedText = text.replace(/-/g, '');
+
+    // 'YYYYMMDD' 형식으로 입력이 된 경우, 'YYYY-MM-DD' 형식으로 변환하여 출력
+    if (formattedText.length <= 4) {
+      setInputDate(formattedText);
+    } else if (formattedText.length <= 6) {
+      setInputDate(formattedText.slice(0, 4) + '-' + formattedText.slice(4));
+    } else {
+      setInputDate(
+        formattedText.slice(0, 4) +
+        '-' +
+        formattedText.slice(4, 6) +
+        '-' +
+        formattedText.slice(6, 8)
+      );
+    }
+  };
 
   const handleManualCountSubmit = async () => {
     if (!inputDate || !moment(inputDate, 'YYYY-MM-DD', true).isValid()) {
@@ -290,6 +326,14 @@ const HomeScreen = () => {
     }
   };
 
+  const handleCloseBottomSheet = () => {
+    // 입력값들을 초기화합니다.
+    setInputCount('');
+    setInputDate('');
+    // Bottom Sheet를 닫습니다.
+    bottomSheetModalRef.current?.close();
+  };
+
   // // ref    바텀시트사용을 위한 코드
   // const bottomSheetRef = useRef < BottomSheet > (null);
   // // variables
@@ -299,9 +343,38 @@ const HomeScreen = () => {
   //   console.log('handleSheetChanges', index);
   // }, []);
 
+  const clearAllData = async () => {
+    try {
+      // await AsyncStorage.clear(); // AsyncStorage에서 모든 데이터 삭제
+      setCounter(0); // 카운터 초기화
+      setCounterYesterday(0); // 어제 카운터 초기화
+      setLastCountDate(null); // 최종 흡연 날짜 초기화
+      setElapsedTime(null); // 경과 시간 초기화
+      setDailyData([]); // 일별 데이터 초기화
+      setWeeksData([]); // 주별 데이터 초기화
+      setCurrentWeekIndex(0); // 현재 주 인덱스 초기화
+      setInputCount(0); // 수동 입력 카운트 초기화
+      setInputDate(''); // 수동 입력 날짜 초기화
+      // 필요한 상태값을 모두 초기화해줍니다.
+
+      // 또는 useEffect에서 호출하는 함수들을 통해 초기화할 수도 있습니다.
+      // fetchWeeklyData(); // 주간 데이터 초기화 함수 호출
+      // retrieveLastCountDate(); // 마지막 흡연 날짜 초기화 함수 호출
+      // calculateElapsedTime(); // 경과 시간 초기화 함수 호출
+      // 등등...
+
+      // 초기화 후 다시 데이터를 가져올 수 있는 함수 호출
+      retrieveCount();
+    } catch (error) {
+      console.error('Error clearing data:', error);
+    }
+  };
+
+  const chartHeight = Platform.OS === 'android' ? 200 : 300; // 안드로이드와 iOS의 높이 차이 적용
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
+    <GestureHandlerRootView style={{ flex: 1, }}>
+      <View style={styles.container} >
         <View style={styles.rowContainer}>
           <View style={styles.SectionContainer}>
             <View style={styles.textContainer}>
@@ -345,20 +418,22 @@ const HomeScreen = () => {
           </View>
           <View style={styles.graphContainer}>
             <Swipeable
-              friction={2}
-              leftThreshold={40}
-              rightThreshold={40}
+              // friction={2}
+              // leftThreshold={40}
+              // rightThreshold={40}
+              friction={20}
+              leftThreshold={100}
+              rightThreshold={100}
               renderLeftActions={() => (
                 <View style={{ marginHorizontal: -20 }}>
-                <Text style={{ textAlign: 'center' }}>전주</Text>
+                  {/* <Text style={{ textAlign: 'center' }}>전주</Text> */}
                   <TouchableOpacity onPress={swipeLeft}>
-                    <Text>전주</Text>
                     <BarChart
                       data={{
-                        labels: weeksData[currentWeekIndex-1]?.map((entry) => moment(entry.date).format('MM/DD')) || [],
+                        labels: weeksData[currentWeekIndex]?.map((entry) => moment(entry.date).format('MM/DD')) || [],
                         datasets: [
                           {
-                            data: weeksData[currentWeekIndex-1]?.map((entry) => entry.value) || [],
+                            data: weeksData[currentWeekIndex]?.map((entry) => entry.value) || [],
                           },
                         ],
                       }}
@@ -393,14 +468,14 @@ const HomeScreen = () => {
               )}
               renderRightActions={() => (
                 <View style={{ marginHorizontal: -20 }}>
-                <Text style={{ textAlign: 'center' }}>다음주</Text>
+                  {/* <Text style={{ textAlign: 'center' }}>다음주</Text> */}
                   <TouchableOpacity onPress={swipeRight}>
                     <BarChart
                       data={{
-                        labels: weeksData[currentWeekIndex+1]?.map((entry) => moment(entry.date).format('MM/DD')) || [],
+                        labels: weeksData[currentWeekIndex]?.map((entry) => moment(entry.date).format('MM/DD')) || [],
                         datasets: [
                           {
-                            data: weeksData[currentWeekIndex+1]?.map((entry) => entry.value) || [],
+                            data: weeksData[currentWeekIndex]?.map((entry) => entry.value) || [],
                           },
                         ],
                       }}
@@ -445,9 +520,7 @@ const HomeScreen = () => {
               }
             >
               <View style={{ marginHorizontal: -20 }}>
-                <Text style={{ textAlign: 'center' }}>일별</Text>
-                {/* <Text style={{ textAlign: 'right' }}>이번주 날짜</Text> */}
-                {/* <Text>이번주</Text> */}
+                {/* <Text style={{ textAlign: 'center' }}>일별</Text> */}
                 <BarChart
                   data={{
                     labels: weeksData[currentWeekIndex]?.map((entry) => moment(entry.date).format('MM/DD')) || [],
@@ -458,7 +531,7 @@ const HomeScreen = () => {
                     ],
                   }}
                   width={Dimensions.get("window").width}
-                  height={300}
+                  height={chartHeight}
                   yAxisSuffix=""
                   // yAxisInterval={100} // optional, defaults to 1
                   fromZero
@@ -518,13 +591,15 @@ const HomeScreen = () => {
                   />
                   <TextInput
                     style={styles.textInput}
-                    onChangeText={(text) => setInputDate(text)}
+                    // onChangeText={(text) => setInputDate(text)}
+                    onChangeText={handleDateChange}
                     value={inputDate}
-                    placeholder="날짜 입력 (YYYY-MM-DD)"
+                    keyboardType="number-pad"
+                    placeholder="YYYYMMDD 자동으로 -이 생성됩니다"
                   />
                   <Button title="입력" onPress={handleManualCountSubmit} />
                 </KeyboardAvoidingView>
-                <TouchableOpacity onPress={() => bottomSheetModalRef.current?.close()}>
+                <TouchableOpacity onPress={handleCloseBottomSheet}>
                   {/* 닫기 버튼 */}
                   <Text style={styles.closeButton}>닫기</Text>
                   {/* <Button title="닫기" onPress={handleManualCountSubmit} /> */}
@@ -535,7 +610,6 @@ const HomeScreen = () => {
         </View>
       </View>
     </GestureHandlerRootView>
-
   );
 };
 
@@ -594,7 +668,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     // justifyContent: 'center',
     // alignItems: 'center',
-    // marginBottom: 30,
+    // marginBottom: -80,
   },
   buttonContainer: {
     borderRadius: 8,
@@ -648,7 +722,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
-
   },
   closeButton: {
     borderColor: 'gray',
@@ -657,7 +730,28 @@ const styles = StyleSheet.create({
     color: 'gray',
     paddingHorizontal: 10,
   },
+
+  androidSpecificStyle: {
+    // 안드로이드 전용 스타일
+    ...Platform.select({
+      android: {
+        // 안드로이드 전용 스타일 지정
+      },
+    }),
+  },
+  iosSpecificStyle: {
+    // iOS 전용 스타일
+    ...Platform.select({
+      ios: {
+        // iOS 전용 스타일 지정
+      },
+    }),
+  },
+
 });
+
 
 export default HomeScreen;
 // export const retrieveCount = () => {};
+// export const clearAllData = () => {};
+// export { clearAllData }; // 함수 내보내기

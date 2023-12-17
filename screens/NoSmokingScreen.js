@@ -3,8 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { useNavigation } from '@react-navigation/native';
 
-const SmokingCessationApp = ({ navigation }) => {
+const SmokingCessationApp = ({navigation}) => {
+
+  // const navigation = useNavigation();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedYear, setSelectedYear] = useState("");
@@ -27,9 +30,19 @@ const SmokingCessationApp = ({ navigation }) => {
     }
   };
 
+  const saveNoSmokingDate2 = async (selectedDate) => {
+    try {
+      await AsyncStorage.setItem('noSmoking', selectedDate.toISOString());
+      // 예외 처리 등을 원하시는 대로 추가하세요
+    } catch (error) {
+      console.error('Error saving noSmoking date:', error);
+    }
+  };
+
   const MoveToProgressScreen = () => {
-    // navigation.navigate('NSProgressScreen', { functionName: startTimer }); // 'NSProgress'는 다른 스크린(페이지)의 이름
     const selectedDate = new Date();
+    console.log(selectedDate);
+    saveNoSmokingDate2(selectedDate); // Async Storage에 선택한 금연 시작 날짜 저장
     navigation.navigate('NSProgressScreen', { selectedDate });
   }
 
@@ -127,10 +140,10 @@ const SmokingCessationApp = ({ navigation }) => {
               </Picker>
             </View>
             <View style={styles.modalCloseBox}>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Text style={styles.modalCloseText}>취소</Text>
               </TouchableOpacity>
-              <View style={{ width: 100 }} /> 
+              <View style={{ width: 100 }} />
               <TouchableOpacity onPress={toggleModal} >
                 <Text style={styles.modalCloseText} onPress={MoveToProgressScreenWithParam}>완료</Text>
               </TouchableOpacity>

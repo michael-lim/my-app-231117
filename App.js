@@ -1,23 +1,23 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Platform } from 'react-native';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+
 import HomeScreen from './screens/HomeScreen';
-import AboutScreen from './aboutscreen';
-import SettingsScreen from './SettingsScreen';
-import GraphScreen from './GraphScreen';
-import CalendarScreen from './CalendarScreen';
-import NoSmokingScreen from './NoSmokingScreen';
-import NSProgressScreen from './NSProgressScreen';
+import AboutScreen from './screens/aboutscreen';
+import SettingsScreen from './screens/SettingsScreen';
+import GraphScreen from './screens/GraphScreen';
+import CalendarScreen from './screens/CalendarScreen';
+import NoSmokingScreen from './screens/NoSmokingScreen';
+import NSProgressScreen from './screens/NSProgressScreen';
 
 const Tab = createBottomTabNavigator();
-
 const Stack = createStackNavigator();
 
-function MainBottomTabNavigator() {
+function BottomTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -46,26 +46,44 @@ function MainBottomTabNavigator() {
           return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
-      style={styles.container}>
+    >
       <Tab.Screen name="홈" component={HomeScreen} />
       <Tab.Screen name="달력" component={CalendarScreen} />
       <Tab.Screen name="통계" component={GraphScreen} />
-      <Tab.Screen name="금연" component={NoSmokingScreen} />
-      {/* <Tab.Screen name="금연진행상황" component={NSProgressScreen} /> */}
+      <Tab.Screen name="금연" component={StatckNavigator} />
       <Tab.Screen name="설정" component={SettingsScreen} />
       <Tab.Screen name="임시" component={AboutScreen} />
     </Tab.Navigator>
   );
 }
 
+function StatckNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="NoSmokingScreen" component={NoSmokingScreen}
+        options={{
+          headerShown: false, // NSProgressScreen 화면의 헤더 숨기기
+        }}
+      />
+      <Stack.Screen name="NSProgressScreen" component={NSProgressScreen}
+        options={{
+          headerShown: false, // NSProgressScreen 화면의 헤더 숨기기
+        }}
+      />
+      {/* <Stack.Screen name="홈" component={HomeScreen} options={{
+        title: '홈',
+        headerTitleAlign: Platform.OS === 'ios' ? 'left' : 'left',
+        // headerShown: false
+      }}
+      /> */}
+    </Stack.Navigator>
+  )
+}
+
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Main" component={MainBottomTabNavigator}  />
-        <Stack.Screen name="NSProgressScreen" component={NSProgressScreen} />
-      </Stack.Navigator>
-      {/* <MainBottomTabNavigator /> */}
+      <BottomTabNavigator />
       <StatusBar style="auto" />
     </NavigationContainer>
   );

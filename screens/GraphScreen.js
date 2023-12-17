@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Dimensions, } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, Dimensions, RefreshControl, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -10,10 +10,18 @@ const GraphScreen = () => {
   const [dailyData, setDailyData] = useState([]);
   const [weeklyData, setWeeklyData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
+  // const [dataChanged, setDataChanged] = useState(false); // 상태 추가
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    fetchData(); // 데이터 다시 불러오기
   }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData(); // 데이터 다시 불러오기
+    setRefreshing(false);
+  }, [setRefreshing]);
 
   const getAllKeysSortedByDate = async () => {
     try {
@@ -30,6 +38,7 @@ const GraphScreen = () => {
       return [];
     }
   };
+
   // 날짜를 기준으로 데이터를 그룹화하는 함수
   const groupDataByInterval = (data, interval) => {
     const groupedData = {};
@@ -45,29 +54,58 @@ const GraphScreen = () => {
     return Object.values(groupedData);
   };
 
+  // const groupDataByInterval = (data, interval) => {
+  //   const groupedData = {};
+  //   data.forEach(({ date, value }) => {
+  //     const formattedDate = new Date(date);
+  //     let intervalKey;
+  
+  //     if (interval === 'week') {
+  //       const firstDayOfWeek = new Date(formattedDate.getFullYear(), formattedDate.getMonth(), formattedDate.getDate() - formattedDate.getDay());
+  //       intervalKey = `${firstDayOfWeek.getFullYear()}-${(firstDayOfWeek.getMonth() + 1).toString().padStart(2, '0')}-${firstDayOfWeek.getDate().toString().padStart(2, '0')}`;
+  //     } else if (interval === 'month') {
+  //       intervalKey = `${formattedDate.getFullYear()}-${(formattedDate.getMonth() + 1).toString().padStart(2, '0')}-01`;
+  //     }
+  
+  //     if (!groupedData[intervalKey]) {
+  //       groupedData[intervalKey] = { date: intervalKey, total: 0, count: 0 };
+  //     }
+  //     groupedData[intervalKey].total += value;
+  //     groupedData[intervalKey].count += 1;
+  //   });
+  //   return Object.values(groupedData);
+  // };
+
+
   const fetchData = async () => {
     try {
       const sortedKeys = await getAllKeysSortedByDate();
       // Filter keys that match the date format 'YYYY-MM-DD'
+      
+      // const isValidDateFormat = (dateString) => {
+      //   // 정규 표현식을 사용하여 'YYYY-MM-DD' 형식에 맞는지 확인
+      //   const dateFormatRegex = /^\d{4}-\d{2}-\d{2}$/;
+      //   return dateFormatRegex.test(dateString);
+      // };
+      // const filteredKeys = sortedKeys.filter((key) => isValidDateFormat(key));
+
       const filteredKeys = sortedKeys.filter((key) => moment(key, 'YYYY-MM-DD', true).isValid());
-      // filteredKeys.sort((a, b) => moment(b, 'YYYY-MM-DD').diff(moment(a, 'YYYY-MM-DD')));
-      console.log(filteredKeys);
-      // Take only the first 7 keys
-      // const recentKeys = filteredKeys.slice(0, 7);
       const result = await AsyncStorage.multiGet(filteredKeys);
-      // console.log(result);
       // 데이터 형태에 맞게 변환하여 chartData로 설정
       const chartData = result.map(([key, value]) => ({
         date: key, // 날짜
         value: parseInt(value), // 저장된 값
       }));
-      setDailyData(chartData); // 일별 데이터 설정
+      const recent7days = chartData.slice(-7);
+      setDailyData(recent7days); // 일별 데이터 설정
       // Moment.js를 사용하여 날짜를 처리하고, 주별 데이터 계산
       const weeklyChartData = groupDataByInterval(chartData, 'week');
-      setWeeklyData(weeklyChartData);
+      const recent8weeks = weeklyChartData.slice(-8);
+      setWeeklyData(recent8weeks);
       // Moment.js를 사용하여 날짜를 처리하고, 월별 데이터 계산
       const monthlyChartData = groupDataByInterval(chartData, 'month');
-      setMonthlyData(monthlyChartData);
+      const recent12months = monthlyChartData.slice(-12);
+      setMonthlyData(recent12months);
     } catch (error) {
       console.error('Error retrieving data:', error);
     }
@@ -75,12 +113,14 @@ const GraphScreen = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ScrollView>
+      <ScrollView refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text>일별 그래프</Text>
           {/* 일별 그래프 */}
           <LineChart
-          // style={graphStyle}
+            // style={graphStyle}
             data={{
               // labels: dailyData.map((entry) => entry.date),
               labels: dailyData.map((entry) => moment(entry.date).format('MM/DD')), // moment.js를 사용하여 날짜 형식 변경
@@ -97,7 +137,7 @@ const GraphScreen = () => {
             fromZero
             withInnerLines
             // verticalLabelRotation="15"
-            verticalLabelRotation={-90}
+            // verticalLabelRotation={-90}
             showValuesOnTopOfBars
             chartConfig={{
               // count: 10,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, GestureHandlerRootView, } from 'react-native-gesture-handler';
 // import { retrieveCount } from './HomeScreen';
 
 const AboutScreen = () => {
@@ -84,6 +84,7 @@ const AboutScreen = () => {
   };
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <ScrollView>
       <View>
         {/* <Text>About 화면</Text> */}
@@ -96,7 +97,7 @@ const AboutScreen = () => {
         ))}
       </View>
     </ScrollView>
-
+    </GestureHandlerRootView>
   );
 };
 

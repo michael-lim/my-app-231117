@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef, } from 'react';
-import { View, StyleSheet, Text, ScrollView } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, StatusBar, Platform } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { Animated } from 'react-native';
-// import { MainBottomTabNavigator} from './App';
 
 const animatedValue = new Animated.Value(0);
 animatedValue.addListener(() => {
   // empty listener
 });
-
 
 const NSProgressScreen = ({ route }) => {
 
@@ -153,35 +151,35 @@ const NSProgressScreen = ({ route }) => {
     return acc;
   }, { duration: Infinity }); // 가장 작은 duration으로 초기화
 
+  const sectionTopHeight = Platform.OS === 'android' ? 200 : 250;
+
   return (
-    <View style={styles.activeContainer}>
-      <View style={styles.sectionTopContainer}>
-        {activeStep.duration !== Infinity && (
-          <View style={styles.chartTopContainer}>
-            <TimerChart
-              duration={activeStep.duration}
-              title={activeStep.title}
-              description={activeStep.description}
-              chartFontSize={50} // 차트의 텍스트 크기 조정
-              textFontSize={20} // 설명 텍스트의 크기 조정
-              chartWidth={280} // 차트의 너비 조정
-              chartHeight={170} // 차트의 높이 조정
-            />
+        <View style={styles.activeContainer}>
+          {/* <View style={styles.sectionTopContainer}> */}
+          <View style={[styles.sectionTopContainer, { height: sectionTopHeight }]}>
+            {activeStep.duration !== Infinity && (
+              <View style={styles.chartTopContainer}>
+                <TimerChart
+                  duration={activeStep.duration}
+                  title={activeStep.title}
+                  description={activeStep.description}
+                  chartFontSize={50} // 차트의 텍스트 크기 조정
+                  textFontSize={20} // 설명 텍스트의 크기 조정
+                  chartWidth={280} // 차트의 너비 조정
+                  chartHeight={170} // 차트의 높이 조정
+                />
+              </View>
+            )}
           </View>
-        )}
-      </View>
-      <View>
-        <Text style={styles.titleText}>금연후 신체 변화</Text>
-      </View>
-      <ScrollView style={styles.scrollContainer}>
-        {steps.map((step, index) => (
-          <TimerChart key={index} duration={step.duration} title={step.title} description={step.description} />
-        ))}
-      </ScrollView>
-      {/* <MainBottomTabNavigator /> */}
-    </View>
-
-
+          <View>
+            <Text style={styles.titleText}>금연후 신체 변화</Text>
+          </View>
+          <ScrollView style={styles.scrollContainer}>
+            {steps.map((step, index) => (
+              <TimerChart key={index} duration={step.duration} title={step.title} description={step.description} />
+            ))}
+          </ScrollView>
+        </View>
   );
 };
 
@@ -193,7 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   sectionTopContainer: {
-    height: 300,
+    // height: 300, // 섹션 상단 높이 조정 (안드로이드 조정으로 위에 변수로 처리)
     // width: '100%',
     // flexDirection: 'row', // 파이차트와 텍스트를 가로로 나란히 배치하기 위한 flex-direction 설정
     justifyContent: 'space-around',
